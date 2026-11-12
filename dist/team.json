@@ -1,0 +1,218 @@
+[
+  {
+    "id": "4c8d7683-ed5f-4689-b5a8-e8965163a626",
+    "name": "Tobias Heller",
+    "role": "Co-Founder",
+    "bio": "Co-Founder von RealStudio. Exited Own Brand.",
+    "image": "assets/team-00.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "69437ad6-52ad-40fc-b2e6-03357c76b86c",
+    "name": "Annabell Johannes",
+    "role": "Head of Content",
+    "bio": "Head of Content. Ex Oceans Apart.",
+    "image": "assets/team-01.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "2c1756ad-b3be-40ae-ab82-63098efa2896",
+    "name": "Kai Krüger",
+    "role": "Co-Founder",
+    "bio": "Co-Founder. Ex Tim Gabel, Inscope21.",
+    "image": "assets/team-02.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "91ee37fa-f9a1-49d5-af9b-b54b62f53768",
+    "name": "Florian Mangel",
+    "role": "Head of TikTok Shop",
+    "bio": "Head of TikTok Shop. Ex TikTok, Amazon.",
+    "image": "assets/team-03.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "7e0cd956-ae3a-49b3-854e-6d879140e891",
+    "name": "Carlotta",
+    "role": "Brand Manager",
+    "bio": null,
+    "image": "assets/team-04.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "34748028-dff8-4135-b42f-d8a04e0e8a0d",
+    "name": "Maurice",
+    "role": "Content Strategist",
+    "bio": null,
+    "image": "assets/team-05.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "8de51add-414b-425a-9e4d-bd2b7fcd2f77",
+    "name": "Adrian",
+    "role": "Business Development",
+    "bio": null,
+    "image": "assets/team-06.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "0e38c81b-fe82-4d94-aba6-94224b8a9c3b",
+    "name": "Bennet",
+    "role": "Brand Manager",
+    "bio": null,
+    "image": "assets/team-07.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "59ed9cd3-bfdf-4052-bade-cab0f94dcf28",
+    "name": "Juliana",
+    "role": "Assistant to CEO",
+    "bio": null,
+    "image": "assets/team-08.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "a2406b37-df14-4076-8e42-e78a76ef75d7",
+    "name": "Jamie",
+    "role": "Brand Manager",
+    "bio": null,
+    "image": "assets/team-09.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "40225f1f-0036-4a6f-875f-8e3416a9bc45",
+    "name": "Franco",
+    "role": "Brand Manager",
+    "bio": null,
+    "image": "assets/team-10.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "99b8212a-a508-46b8-837f-078cd688b38f",
+    "name": "Richard",
+    "role": "Video Editor",
+    "bio": null,
+    "image": "assets/team-11.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "e944a77f-2a90-41d4-9b76-2641daaf9fb5",
+    "name": "Yuan",
+    "role": "Video Editor",
+    "bio": null,
+    "image": "assets/team-12.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "bdd787e2-def8-4eaf-b1b3-d0f9f0a15b76",
+    "name": "Celina",
+    "role": "Brand Manager",
+    "bio": null,
+    "image": "assets/team-13.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "4372f55a-e395-4812-85c3-c15fee4b6093",
+    "name": "Cecilia",
+    "role": "Brand Manager",
+    "bio": null,
+    "image": "assets/team-14.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "e9e6b5b7-efd5-4da2-b415-fafed10282a9",
+    "name": "Marco",
+    "role": "Business Development",
+    "bio": null,
+    "image": "assets/team-15.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "15c5d899-d1d5-44be-8b2f-4a06af5bdf5c",
+    "name": "Eric",
+    "role": "Video Editor",
+    "bio": null,
+    "image": "assets/team-16.png",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "8c8527d0-1f65-4e50-a846-f7b91cfaabea",
+    "name": "Timo",
+    "role": "Performance Marketing Expert",
+    "bio": null,
+    "image": "assets/team-17.png",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "020f7b2c-27dd-4ea8-82d8-85b4ca149fb3",
+    "name": "Tom",
+    "role": "Brand Manager Assistenz",
+    "bio": null,
+    "image": "assets/team-18.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "06e09795-f966-4a8a-bad9-d1f41cdca8f1",
+    "name": "Valentino",
+    "role": "Head of Creator Marketing",
+    "bio": null,
+    "image": "assets/team-19.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "1c8c3352-725e-47a6-ac0e-78a82f0d1e9c",
+    "name": "Felix",
+    "role": "Brand Manager",
+    "bio": null,
+    "image": "assets/team-20.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "33433f7b-d7af-46b4-84b3-120f7b7f24b2",
+    "name": "Niclas",
+    "role": "TikTok Shop Manager",
+    "bio": null,
+    "image": "assets/team-21.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "61ca5bd1-397a-46ca-8cc3-6a05616d4b9e",
+    "name": "Philipp",
+    "role": "Senior Brand Manager",
+    "bio": null,
+    "image": "assets/team-22.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "6b316d42-d811-4437-88e9-db187c1ccf2c",
+    "name": "Nina",
+    "role": "TikTok Shop Managerin",
+    "bio": null,
+    "image": "assets/team-23.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "76d042f7-504b-48bc-9bd3-4d38c969c59e",
+    "name": "Damian",
+    "role": "Business Development",
+    "bio": null,
+    "image": "assets/team-24.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "aa45c73c-c619-45fd-b3fe-88cf76d088cc",
+    "name": "Louis",
+    "role": "Video Editor",
+    "bio": null,
+    "image": "assets/team-25.jpg",
+    "source": "https://real-studio.de/studio"
+  },
+  {
+    "id": "afa71b3c-9ce7-434f-a33b-7defcc659519",
+    "name": "Mina",
+    "role": "Brand Manager",
+    "bio": null,
+    "image": "assets/team-26.jpg",
+    "source": "https://real-studio.de/studio"
+  }
+]

@@ -1,0 +1,85 @@
+{
+  "asOf": "2026-11-12",
+  "clients": [
+    {
+      "id": "toom",
+      "name": "toom Baumarkt",
+      "category": "Retail · TikTok",
+      "result": "4.5M views",
+      "resultDetail": "RealStudio reports 4.5M views across three campaign videos. Individual clip results are not public.",
+      "source": "https://real-studio.de/cases/toom-baumarkt",
+      "focus": "Turn store discovery into a repeatable video format",
+      "next": "Review the two public showcase clips, choose the next opening to test",
+      "sampleOwner": "Content strategy",
+      "sampleStatus": "Review due",
+      "lastUpdate": "2026-11-12"
+    },
+    {
+      "id": "mcneill",
+      "name": "McNeill",
+      "category": "School bags · TikTok Shop",
+      "result": "Mid five figures",
+      "resultDetail": "RealStudio reports monthly GMV in the mid five figures and more than 500K product views. These are case-level figures.",
+      "source": "https://real-studio.de/cases/mcneill",
+      "focus": "Carry winning product hooks into new creative tests",
+      "next": "Prioritize the next Ghost Pen and colour-led variants",
+      "sampleOwner": "Shop operations",
+      "sampleStatus": "Decision needed",
+      "lastUpdate": "2026-11-12"
+    },
+    {
+      "id": "smilodox",
+      "name": "Smilodox",
+      "category": "Fitness · TikTok Shop",
+      "result": "Mid five figures",
+      "resultDetail": "RealStudio reports TikTok Shop sales in the mid five figures in the first month. Daily sales and per-video attribution are not public.",
+      "source": "https://real-studio.de/cases/smilodox",
+      "focus": "Keep creator output tied to shop outcomes",
+      "next": "Agree the metric export needed for a proper creative review",
+      "sampleOwner": "Creator marketing",
+      "sampleStatus": "Awaiting data",
+      "lastUpdate": "2026-11-12"
+    }
+  ],
+  "videos": [
+    {
+      "id": "toom-01",
+      "clientId": "toom",
+      "title": "Advent calendar, drill aisle",
+      "platform": "RealStudio case video",
+      "url": "https://play.gumlet.io/embed/69bc5932baa7d9f8a4ea6e14",
+      "format": "In-store exchange",
+      "length": "16 sec",
+      "sourceType": "Public case",
+      "views": null,
+      "next": "Test a faster reveal of the calendar",
+      "note": "A shopper holding a drill hears about the calendar. No clip-level performance is published."
+    },
+    {
+      "id": "toom-02",
+      "clientId": "toom",
+      "title": "Brochures to app offers",
+      "platform": "RealStudio case video",
+      "url": "https://play.gumlet.io/embed/69bc5e6cbaa7d9f8a4eae6d1",
+      "format": "In-store product demo",
+      "length": "20 sec",
+      "sourceType": "Public case",
+      "views": null,
+      "next": "Make the app benefit legible earlier",
+      "note": "A shopper carrying paper brochures is shown local offers in the app. No clip-level performance is published."
+    }
+  ],
+  "work": [
+    {"id":"w01","clientId":"toom","title":"Choose the next opening for the Advent format","owner":"Content strategy","status":"In review","due":"2026-11-13","sourceType":"Demo task","update":"Two public examples are ready to compare. The choice of the next opening is still open."},
+    {"id":"w02","clientId":"toom","title":"Write a tighter first five seconds for the app-offers clip","owner":"Video editing","status":"In progress","due":"2026-11-13","sourceType":"Demo task","update":"Proposed edit brings the offer and phone screen into the opening beat."},
+    {"id":"w03","clientId":"mcneill","title":"Select a Ghost Pen variant to test","owner":"Shop operations","status":"Needs decision","due":"2026-11-13","sourceType":"Demo task","update":"Requesting a product-level sales cut before prioritizing the colour variant."},
+    {"id":"w04","clientId":"smilodox","title":"Request creator and shop result export","owner":"Creator marketing","status":"Waiting","due":"2026-11-14","sourceType":"Demo task","update":"Public case has a first-month total, not a creator-by-creator result."},
+    {"id":"w05","clientId":"toom","title":"Confirm whether a new clip is ready to publish","owner":"Brand management","status":"In progress","due":"2026-11-14","sourceType":"Demo task","update":"Check production handoff and destination link before any publish date is promised."},
+    {"id":"w06","clientId":"mcneill","title":"Prepare weekly client update","owner":"Brand management","status":"In progress","due":"2026-11-13","sourceType":"Demo task","update":"Separate case results from this week's unverified figures."}
+  ],
+  "decisions": [
+    {"id":"d01","clientId":"toom","title":"Which opening gets the next test?","detail":"The two public clips show different paths. Pick one format to brief first so production does not split effort.","recommendation":"Start with the app-offers clip. Make the benefit visible in the first three seconds.","owner":"Content strategy","due":"2026-11-13","sourceType":"Demo recommendation"},
+    {"id":"d02","clientId":"mcneill","title":"Which product variant gets priority?","detail":"The case mentions the Ghost Pen and winning colours, but no current SKU-level result is available here.","recommendation":"Ask for the current product export before choosing a winner.","owner":"Shop operations","due":"2026-11-13","sourceType":"Demo recommendation"},
+    {"id":"d03","clientId":"smilodox","title":"What should the creative review measure?","detail":"The public first-month sales total cannot show which creator or video drove orders.","recommendation":"Request creator IDs, post links, spend and shop orders in one export.","owner":"Creator marketing","due":"2026-11-14","sourceType":"Demo recommendation"}
+  ]
+}

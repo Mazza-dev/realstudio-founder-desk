@@ -1,0 +1,15 @@
+record_id,record_type,client,title,owner_or_source,status,date,source_type,source_url,note
+toom,case,toom Baumarkt,4.5M views,RealStudio,Public case,2026-11-12,public,https://real-studio.de/cases/toom-baumarkt,RealStudio reports 4.5M views across three campaign videos. Individual clip results are not public.
+mcneill,case,McNeill,Mid five figures,RealStudio,Public case,2026-11-12,public,https://real-studio.de/cases/mcneill,RealStudio reports monthly GMV in the mid five figures and more than 500K product views. These are case-level figures.
+smilodox,case,Smilodox,Mid five figures,RealStudio,Public case,2026-11-12,public,https://real-studio.de/cases/smilodox,RealStudio reports TikTok Shop sales in the mid five figures in the first month. Daily sales and per-video attribution are not public.
+toom-01,video,toom Baumarkt,"Advent calendar, drill aisle",RealStudio,Public link,2026-11-12,public,https://play.gumlet.io/embed/69bc5932baa7d9f8a4ea6e14,A shopper holding a drill hears about the calendar. No clip-level performance is published.
+toom-02,video,toom Baumarkt,Brochures to app offers,RealStudio,Public link,2026-11-12,public,https://play.gumlet.io/embed/69bc5e6cbaa7d9f8a4eae6d1,A shopper carrying paper brochures is shown local offers in the app. No clip-level performance is published.
+w01,task,toom Baumarkt,Choose the next opening for the Advent format,Content strategy,In review,2026-11-13,demo,,Two public examples are ready to compare. The choice of the next opening is still open.
+w02,task,toom Baumarkt,Write a tighter first five seconds for the app-offers clip,Video editing,In progress,2026-11-13,demo,,Proposed edit brings the offer and phone screen into the opening beat.
+w03,task,McNeill,Select a Ghost Pen variant to test,Shop operations,Needs decision,2026-11-13,demo,,Requesting a product-level sales cut before prioritizing the colour variant.
+w04,task,Smilodox,Request creator and shop result export,Creator marketing,Waiting,2026-11-14,demo,,"Public case has a first-month total, not a creator-by-creator result."
+w05,task,toom Baumarkt,Confirm whether a new clip is ready to publish,Brand management,In progress,2026-11-14,demo,,Check production handoff and destination link before any publish date is promised.
+w06,task,McNeill,Prepare weekly client update,Brand management,In progress,2026-11-13,demo,,Separate case results from this week's unverified figures.
+d01,decision,toom Baumarkt,Which opening gets the next test?,Content strategy,Open,2026-11-13,demo,,Start with the app-offers clip. Make the benefit visible in the first three seconds.
+d02,decision,McNeill,Which product variant gets priority?,Shop operations,Open,2026-11-13,demo,,Ask for the current product export before choosing a winner.
+d03,decision,Smilodox,What should the creative review measure?,Creator marketing,Open,2026-11-14,demo,,"Request creator IDs, post links, spend and shop orders in one export."
