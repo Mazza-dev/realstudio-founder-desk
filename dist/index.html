@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="auth-locked">
   <div class="app-shell">
     <aside class="sidebar" aria-label="Main navigation">
       <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>REAL<span class="brand-light">STUDIO</span></span></div>
@@ -32,13 +32,15 @@
       <header class="topbar">
         <div class="mobile-brand">REALSTUDIO <span>DEMO</span></div>
         <div class="breadcrumbs">Founder desk <span>/</span> <strong id="crumb">Clients</strong></div>
-        <div class="top-actions"><span id="current-date"></span><span class="top-avatar">T</span></div>
+        <div class="top-actions"><span id="current-date"></span><button id="sign-out" class="sign-out" type="button">Sign out</button><span class="top-avatar">T</span></div>
       </header>
       <main id="app" tabindex="-1"></main>
       <footer class="footer">Real team identities and case results come from RealStudio's public site. Tasks, decisions and status updates are sample data prepared by Tolani.</footer>
     </div>
   </div>
   <dialog id="video-dialog" class="modal"><button class="modal-close" aria-label="Close video">×</button><div class="modal-body"></div></dialog>
+  <script src="vendor/supabase.min.js" defer></script>
+  <script src="config.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>

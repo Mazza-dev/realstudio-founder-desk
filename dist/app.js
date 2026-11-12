@@ -1,18 +1,42 @@
 const $ = (s, root=document) => root.querySelector(s);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let data, team;
+let data, team, db;
 const state = {
   page: 'clients', client: null, search: '',
-  videos: JSON.parse(localStorage.getItem('rs_videos') || '[]'),
-  resolved: JSON.parse(localStorage.getItem('rs_resolved') || '[]'),
+  user: null, videos: [], resolved: [],
   report: null
 };
 const source = (url, text='Source ↗') => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${text}</a>`;
 const badge = (text, kind='') => `<span class="badge ${kind}">${esc(text)}</span>`;
 const clientName = id => data.clients.find(c => c.id === id)?.name || id;
 const allVideos = () => [...data.videos, ...state.videos];
-const save = () => {localStorage.setItem('rs_videos', JSON.stringify(state.videos));localStorage.setItem('rs_resolved', JSON.stringify(state.resolved));};
 function toast(message){const el=document.createElement('div');el.className='toast';el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),2800);}
+
+function renderAuth(message=''){
+  document.body.classList.add('auth-locked');
+  $('#app').innerHTML=`<div class="auth-card"><div class="brand"><span class="brand-mark"></span><span>REAL<span class="brand-light">STUDIO</span></span></div><p class="eyebrow">Founder desk · demo</p><h1>Sign in</h1><p>This sample dashboard uses Supabase accounts. Enter the email and password created for this demo.</p><form id="login-form"><label for="login-email">Email</label><input class="input" id="login-email" name="email" type="email" autocomplete="username" required><label for="login-password">Password</label><input class="input" id="login-password" name="password" type="password" autocomplete="current-password" required><button class="btn primary" type="submit">Sign in</button><p class="auth-error" role="alert">${esc(message)}</p></form><p class="auth-note">Access is by invitation. Public case information and team portraits are attributed to RealStudio; all work activity is sample data.</p></div>`;
+  $('#login-form').addEventListener('submit',async e=>{
+    e.preventDefault();const button=$('#login-form button');button.disabled=true;button.textContent='Signing in…';
+    const f=new FormData(e.currentTarget);const {data:result,error}=await db.auth.signInWithPassword({email:String(f.get('email')).trim(),password:String(f.get('password'))});
+    if(error){renderAuth(error.message);return;}await enterApp(result.user);
+  });
+}
+
+async function enterApp(user){
+  state.user=user;
+  const [videos,reviewed]=await Promise.all([
+    db.from('demo_videos').select('id,client_id,title,url,created_at').eq('user_id',user.id).order('created_at',{ascending:false}),
+    db.from('reviewed_decisions').select('decision_id').eq('user_id',user.id)
+  ]);
+  if(videos.error||reviewed.error){renderAuth('The demo database is not ready yet. Please try again shortly.');return;}
+  state.videos=videos.data.map(v=>({id:v.id,clientId:v.client_id,title:v.title,url:v.url,platform:'Public link',format:'Added for review',sourceType:'Added to demo',views:null,note:'Added by the reviewer. Platform metrics are not connected.'}));
+  state.resolved=reviewed.data.map(d=>d.decision_id);
+  document.body.classList.remove('auth-locked');
+  const [page,client]=location.hash.slice(1).split('/');if(['clients','teammates','decisions','reports'].includes(page)){state.page=page;state.client=client||null;}
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===state.page));
+  $('#crumb').textContent=({clients:'Clients',teammates:'Teammates',decisions:'Founder decisions',reports:'Reports'})[state.page];
+  render();
+}
 
 function setPage(page, client=null){
   state.page=page;state.client=client;state.search='';state.report=null;
@@ -59,7 +83,7 @@ function clientDetail(id){
     <div class="section-title"><h2>Video library</h2><span>${vids.length} saved</span></div>
     ${id==='toom'?'<p class="case-note"><strong>Views are not assigned to these clips.</strong> The public 4.5M total covers three campaign videos, while only two are shown here.</p>':''}
     ${vids.length?`<div class="video-grid">${vids.map(videoCard).join('')}</div>`:'<div class="empty">No public video link is attached to this case yet. Add a video below to show how a new review enters the queue.</div>'}
-    <div class="section-title"><h2>Add a video</h2><span>Saved in this browser</span></div>
+    <div class="section-title"><h2>Add a video</h2><span>Saved to your Supabase account</span></div>
     <div class="card"><p class="meta">Paste a public video URL and name it. This creates a review record; it does not pull private performance metrics.</p><form id="add-video" class="inline-form"><input name="title" class="input" placeholder="Video title" required maxlength="80"><input name="url" class="input" placeholder="https://…" type="url" required><button class="btn primary" type="submit">Add video</button></form></div>
     <div class="section-title"><h2>Work queue</h2><span>Sample workflow</span></div><div class="list"><div class="list-row head"><span>Task</span><span>Owner</span><span>Status</span><span>Due</span></div>${work.map(w=>`<div class="list-row"><strong>${esc(w.title)}<br><span class="meta">${esc(w.update)}</span></strong><span>${esc(w.owner)}</span>${badge(w.status,w.status==='Needs decision'?'amber':'green')}<span>${esc(w.due)}</span></div>`).join('')}</div>
   </div>`;
@@ -96,9 +120,9 @@ function buildReport(){
   const stamp=new Date().toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'});
   const html=`<div class="report-box" id="report-result"><p class="eyebrow">Generated ${esc(stamp)}</p><h2>Founder update · sample feed for ${esc(today)}</h2>
     <p>This is a generated summary of the public case data and clearly marked demo records in this dashboard. It is not a live RealStudio report.</p>
-    <div class="stat-strip"><div class="stat"><strong>${data.clients.length}</strong><span>Public client cases</span></div><div class="stat"><strong>${data.videos.length+added}</strong><span>Video links in this browser</span></div><div class="stat"><strong>${open.length}</strong><span>Sample decisions open</span></div></div>
+    <div class="stat-strip"><div class="stat"><strong>${data.clients.length}</strong><span>Public client cases</span></div><div class="stat"><strong>${data.videos.length+added}</strong><span>Video links in this account</span></div><div class="stat"><strong>${open.length}</strong><span>Sample decisions open</span></div></div>
     <h3>Client work</h3><ul>${data.clients.map(c=>`<li><strong>${esc(c.name)}</strong> · ${esc(c.resultDetail)} ${source(c.source,'Case ↗')} Next sample step · ${esc(c.next)}.</li>`).join('')}</ul>
-    <h3>Videos and creators</h3><p>${data.videos.length} verified showcase video links from the Toom case${added?`, plus ${added} video link${added===1?'':'s'} added in this browser`:''}. No individual video views, creator-level results, or new creator posts are available. The case's 4.5M views cannot be split between the two clips. ${source(data.clients[0].source,'Toom source ↗')}</p>
+    <h3>Videos and creators</h3><p>${data.videos.length} verified showcase video links from the Toom case${added?`, plus ${added} video link${added===1?'':'s'} added to this account`:''}. No individual video views, creator-level results, or new creator posts are available. The case's 4.5M views cannot be split between the two clips. ${source(data.clients[0].source,'Toom source ↗')}</p>
     <h3>Team and blockers</h3><p>${data.work.length} sample tasks are in the queue. ${data.work.filter(w=>w.status==='Waiting').length} is waiting for data and ${data.work.filter(w=>w.status==='Needs decision').length} needs a decision. These are demo statuses, not staff updates. ${source('demo-feed.csv','Sample feed ↗')}</p>
     <h3>Decisions required</h3><ul>${open.length?open.map(d=>`<li><strong>${esc(clientName(d.clientId))}</strong> · ${esc(d.title)} ${source(data.clients.find(c=>c.id===d.clientId).source,'Case ↗')}</li>`).join(''):'<li>No sample decisions remain open.</li>'}</ul>
     <h3>Next commitments in the sample feed</h3><ul>${due.map(w=>`<li>${esc(clientName(w.clientId))} · ${esc(w.title)} · ${esc(w.owner)}</li>`).join('')}</ul>
@@ -110,7 +134,7 @@ function buildReport(){
 function reportsPage(){
   return `<div class="page">${pageHead('04 / Daily readout','Reports','One button turns the current case links, saved videos, sample work queue and open decisions into a short founder update.')}
     <div class="page-hero"><p class="eyebrow">One useful report</p><h2>Generate the daily readout</h2><p>Runs on the data visible here. It will not send a message or invent private sales, video or teammate metrics.</p><div class="report-actions"><button class="btn primary" id="generate-report">Generate report ↗</button><a class="btn ghost" href="demo-feed.csv" download>Download sample feed</a></div></div>
-    <div class="two-col"><div class="card"><h3>Included now</h3><p class="meta">Three public cases, two public Toom clips, browser-added video links, sample task statuses and founder decisions.</p></div><div class="card"><h3>Needed for a live version</h3><p class="meta">Authorized client analytics, shop results, video accounts and Slack updates. No connection to RealStudio's systems is implied here.</p></div></div>
+    <div class="two-col"><div class="card"><h3>Included now</h3><p class="meta">Three public cases, two public Toom clips, video links saved to your Supabase account, sample task statuses and founder decisions.</p></div><div class="card"><h3>Needed for a live version</h3><p class="meta">Authorized client analytics, shop results, video accounts and Slack updates. No connection to RealStudio's systems is implied here.</p></div></div>
     <div id="report-slot">${state.report?state.report.html+'<div class="report-actions"><button class="btn" id="copy-report">Copy text</button><button class="btn" id="download-report">Download text</button></div>':''}</div>
   </div>`;
 }
@@ -120,9 +144,9 @@ function render(){
   document.querySelectorAll('[data-client]').forEach(b=>b.addEventListener('click',()=>setPage('clients',b.dataset.client)));
   $('#back-clients')?.addEventListener('click',()=>setPage('clients'));
   $('#team-search')?.addEventListener('input',e=>{state.search=e.target.value;const pos=e.target.selectionStart;render();const input=$('#team-search');input.focus();input.setSelectionRange(pos,pos);});
-  $('#add-video')?.addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.currentTarget), title=String(f.get('title')).trim(),url=String(f.get('url')).trim();try{const u=new URL(url);if(u.protocol!=='https:')throw Error();}catch{toast('Use an https video link');return;}state.videos.push({id:'added-'+Date.now(),clientId:state.client,title,platform:'Public link',url,format:'Added for review',sourceType:'Added in browser',views:null,note:'Added by the reviewer. Platform metrics are not connected.'});save();render();toast('Video added to this account');});
+  $('#add-video')?.addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget,f=new FormData(form),title=String(f.get('title')).trim(),url=String(f.get('url')).trim();try{const u=new URL(url);if(u.protocol!=='https:')throw Error();}catch{toast('Use an https video link');return;}const button=form.querySelector('button');button.disabled=true;const {data:row,error}=await db.from('demo_videos').insert({user_id:state.user.id,client_id:state.client,title,url}).select('id').single();if(error){button.disabled=false;toast('Could not save video');return;}state.videos.push({id:row.id,clientId:state.client,title,platform:'Public link',url,format:'Added for review',sourceType:'Added to demo',views:null,note:'Added by the reviewer. Platform metrics are not connected.'});render();toast('Video added to this account');});
   document.querySelectorAll('[data-video]').forEach(b=>b.addEventListener('click',()=>{const v=allVideos().find(x=>x.id===b.dataset.video);if(!v)return;if(!v.url.includes('play.gumlet.io/embed/')){window.open(v.url,'_blank','noopener');return;}const d=$('#video-dialog');$('.modal-body',d).innerHTML=`<h2>${esc(v.title)}</h2><iframe src="${esc(v.url)}" title="${esc(v.title)}" allow="autoplay; fullscreen" allowfullscreen></iframe><p class="meta">${esc(v.note)}</p>`;d.showModal();}));
-  document.querySelectorAll('[data-resolve]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.resolve;state.resolved=state.resolved.includes(id)?state.resolved.filter(x=>x!==id):[...state.resolved,id];save();render();}));
+  document.querySelectorAll('[data-resolve]').forEach(b=>b.addEventListener('click',async()=>{const id=b.dataset.resolve,wasReviewed=state.resolved.includes(id);b.disabled=true;const result=wasReviewed?await db.from('reviewed_decisions').delete().eq('user_id',state.user.id).eq('decision_id',id):await db.from('reviewed_decisions').insert({user_id:state.user.id,decision_id:id});if(result.error){b.disabled=false;toast('Could not update decision');return;}state.resolved=wasReviewed?state.resolved.filter(x=>x!==id):[...state.resolved,id];render();}));
   $('#generate-report')?.addEventListener('click',()=>{state.report=buildReport();render();$('#report-result')?.scrollIntoView({behavior:'smooth',block:'start'});});
   $('#copy-report')?.addEventListener('click',()=>navigator.clipboard.writeText(state.report.plain).then(()=>toast('Report copied')));
   $('#download-report')?.addEventListener('click',()=>{const blob=new Blob([state.report.plain],{type:'text/plain'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='realstudio-founder-update.txt';a.click();URL.revokeObjectURL(url);});
@@ -132,4 +156,14 @@ document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=
 $('.modal-close').addEventListener('click',()=>$('#video-dialog').close());
 $('#video-dialog').addEventListener('close',()=>$('.modal-body').innerHTML='');
 $('#current-date').textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-Promise.all([fetch('data.json').then(r=>r.json()),fetch('team.json').then(r=>r.json())]).then(([d,t])=>{data=d;team=t;const [page,client]=location.hash.slice(1).split('/');if(['clients','teammates','decisions','reports'].includes(page)){state.page=page;state.client=client||null;}document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===state.page));$('#crumb').textContent=({clients:'Clients',teammates:'Teammates',decisions:'Founder decisions',reports:'Reports'})[state.page];render();}).catch(()=>{$('#app').innerHTML='<div class="page"><h1>Could not load the demo data</h1><p>Please refresh the page.</p></div>';});
+$('#sign-out').addEventListener('click',async()=>{await db.auth.signOut();state.user=null;state.videos=[];state.resolved=[];state.report=null;renderAuth();});
+Promise.all([fetch('data.json').then(r=>r.json()),fetch('team.json').then(r=>r.json())]).then(async([d,t])=>{
+  data=d;team=t;
+  const config=window.REALSTUDIO_SUPABASE;
+  if(!config?.url||!config?.publishableKey){$('#app').innerHTML='<div class="auth-card"><div class="brand"><span class="brand-mark"></span><span>REALSTUDIO</span></div><h1>Setup in progress</h1><p>Supabase sign-in is being connected. Please check back shortly.</p></div>';return;}
+  db=supabase.createClient(config.url,config.publishableKey);
+  const {data:session,error}=await db.auth.getSession();
+  if(error){renderAuth(error.message);return;}
+  if(session.session?.user)await enterApp(session.session.user);else renderAuth();
+  db.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'&&state.user){state.user=null;renderAuth();}});
+}).catch(()=>{$('#app').innerHTML='<div class="auth-card"><h1>Could not load the demo</h1><p>Please refresh the page.</p></div>';});
