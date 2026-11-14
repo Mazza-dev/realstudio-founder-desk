@@ -3,7 +3,7 @@ const json = (body, status=200) => new Response(JSON.stringify(body), {
   headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}
 });
 
-async function generateReport(request, env) {
+export async function generateReport(request, env) {
   if(request.method!=='POST') return json({error:'Method not allowed'},405);
   const origin=request.headers.get('origin');
   if(origin&&origin!==new URL(request.url).origin) return json({error:'Forbidden'},403);
