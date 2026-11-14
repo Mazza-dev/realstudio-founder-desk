@@ -1,4 +1,4 @@
-import { generateReport } from '../worker/handler.js';
+import { generateReport } from '../lib/report.js';
 
 export default async function handler(req, res) {
   const host = req.headers['x-forwarded-host'] || req.headers.host;

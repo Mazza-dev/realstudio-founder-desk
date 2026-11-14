@@ -1,11 +1,26 @@
 const $ = (s, root=document) => root.querySelector(s);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let data, team, db;
+let data, team;
 const state = {
   page: 'clients', client: null, search: '',
-  user: null, videos: [], resolved: [], statuses: {}, statusUpdated: {}, reviewedAt: {},
+  videos: [], resolved: [], statuses: {}, statusUpdated: {}, reviewedAt: {},
   report: null, generating: false
 };
+const storageKey = 'realstudio-founder-desk-v1';
+function saveChanges(){
+  try { localStorage.setItem(storageKey,JSON.stringify({videos:state.videos,resolved:state.resolved,statuses:state.statuses,statusUpdated:state.statusUpdated,reviewedAt:state.reviewedAt})); }
+  catch { toast('Could not save changes in this browser'); }
+}
+function loadChanges(){
+  try {
+    const saved=JSON.parse(localStorage.getItem(storageKey)||'{}');
+    state.videos=Array.isArray(saved.videos)?saved.videos:[];
+    state.resolved=Array.isArray(saved.resolved)?saved.resolved:[];
+    state.statuses=saved.statuses&&typeof saved.statuses==='object'?saved.statuses:{};
+    state.statusUpdated=saved.statusUpdated&&typeof saved.statusUpdated==='object'?saved.statusUpdated:{};
+    state.reviewedAt=saved.reviewedAt&&typeof saved.reviewedAt==='object'?saved.reviewedAt:{};
+  } catch { /* Use the default view if browser storage is unavailable. */ }
+}
 const source = (url, text='Source ↗') => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${text}</a>`;
 const badge = (text, kind='') => `<span class="badge ${kind}">${esc(text)}</span>`;
 const clientName = id => data.clients.find(c => c.id === id)?.name || id;
@@ -15,30 +30,8 @@ const statusOptions = ['To plan','In progress','In review','Waiting','Needs deci
 const statusSelect = (type,id) => `<select class="status-select" data-status-type="${type}" data-status-id="${esc(id)}" aria-label="Change status">${statusOptions.map(s=>`<option value="${s}" ${currentStatus(type,id)===s?'selected':''}>${s}</option>`).join('')}</select>`;
 function toast(message){const el=document.createElement('div');el.className='toast';el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),2800);}
 
-function renderAuth(message=''){
-  document.body.classList.add('auth-locked');
-  $('#app').innerHTML=`<div class="auth-card"><div class="brand"><img class="brand-logo" src="/realstudio-logo.webp" alt="RealStudio"></div><p class="eyebrow">Founder desk</p><h1>Sign in</h1><form id="login-form"><label for="login-email">Email</label><input class="input" id="login-email" name="email" type="email" autocomplete="username" required><label for="login-password">Password</label><input class="input" id="login-password" name="password" type="password" autocomplete="current-password" required><button class="btn primary" type="submit">Sign in</button><p class="auth-error" role="alert">${esc(message)}</p></form></div>`;
-  $('#login-form').addEventListener('submit',async e=>{
-    e.preventDefault();const button=$('#login-form button');button.disabled=true;button.textContent='Signing in…';
-    const f=new FormData(e.currentTarget);const {data:result,error}=await db.auth.signInWithPassword({email:String(f.get('email')).trim(),password:String(f.get('password'))});
-    if(error){renderAuth(error.message);return;}await enterApp(result.user);
-  });
-}
-
-async function enterApp(user){
-  state.user=user;
-  const [videos,reviewed,statuses]=await Promise.all([
-    db.from('demo_videos').select('id,client_id,title,url,created_at').eq('user_id',user.id).order('created_at',{ascending:false}),
-    db.from('reviewed_decisions').select('decision_id,reviewed_at').eq('user_id',user.id),
-    db.from('workspace_statuses').select('record_type,record_id,status,updated_at')
-  ]);
-  if(videos.error||reviewed.error||statuses.error){renderAuth('Could not load the workspace. Please try again.');return;}
-  state.videos=videos.data.map(v=>({id:v.id,clientId:v.client_id,title:v.title,url:v.url,createdAt:v.created_at,platform:'Link',format:'Video',sourceType:'Saved',views:null,note:''}));
-  state.resolved=reviewed.data.map(d=>d.decision_id);
-  state.reviewedAt=Object.fromEntries(reviewed.data.map(d=>[d.decision_id,d.reviewed_at]));
-  state.statuses=Object.fromEntries(statuses.data.map(s=>[`${s.record_type}:${s.record_id}`,s.status]));
-  state.statusUpdated=Object.fromEntries(statuses.data.map(s=>[`${s.record_type}:${s.record_id}`,s.updated_at]));
-  document.body.classList.remove('auth-locked');
+function enterApp(){
+  loadChanges();
   const [page,client]=location.hash.slice(1).split('/');if(['clients','teammates','decisions','reports'].includes(page)){state.page=page;state.client=client||null;}
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===state.page));
   $('#crumb').textContent=({clients:'Clients',teammates:'Teammates',decisions:'Founder decisions',reports:'Reports'})[state.page];
@@ -125,6 +118,19 @@ function reportPayload(){
   };
 }
 
+function localReport(){
+  const input=reportPayload();
+  const day=value=>value?new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(value)):null;
+  const today=day(new Date().toISOString());
+  const changes=[
+    ...input.clients.filter(c=>day(c.statusUpdatedAt)===today).map(c=>`${c.name} is ${c.status.toLowerCase()}.`),
+    ...input.work.filter(w=>day(w.statusUpdatedAt)===today).map(w=>`${w.title} is ${w.status.toLowerCase()}.`),
+    ...input.videos.filter(v=>day(v.createdAt)===today).map(v=>`${v.title} was added to ${v.client}.`)
+  ];
+  const open=input.decisions.filter(d=>!d.reviewed);
+  return `Today\n${changes.length?changes.join('\n'):'No updates were recorded today.'}\n\nOpen decisions\n${open.length?open.map(d=>`${d.client}: ${d.title}`).join('\n'):'None.'}\n\nNext\n${open.length?`Review ${open[0].title.toLowerCase()}.`:'Check the work queue for the next update.'}`;
+}
+
 function reportsPage(){
   return `<div class="page">${pageHead('Reports')}
     <div class="page-hero"><h2>Daily update</h2><div class="report-actions"><button class="btn primary" id="generate-report" ${state.generating?'disabled':''}>${state.generating?'Generating…':'Generate report'}</button></div></div>
@@ -135,27 +141,23 @@ function reportsPage(){
 function render(){
   $('#app').innerHTML=({clients:clientsPage,teammates:teammatesPage,decisions:decisionsPage,reports:reportsPage})[state.page]();
   document.querySelectorAll('[data-status-type]').forEach(select=>select.addEventListener('change',async e=>{
-    const el=e.currentTarget,type=el.dataset.statusType,id=el.dataset.statusId,key=`${type}:${id}`,previous=currentStatus(type,id),status=el.value;
-    el.disabled=true;
+    const el=e.currentTarget,type=el.dataset.statusType,id=el.dataset.statusId,key=`${type}:${id}`,status=el.value;
     const updatedAt=new Date().toISOString();
-    const {error}=await db.from('workspace_statuses').upsert({record_type:type,record_id:id,status,updated_by:state.user.id,updated_at:updatedAt},{onConflict:'record_type,record_id'});
-    if(error){el.value=previous;el.disabled=false;toast('Could not save status');return;}
-    state.statuses[key]=status;state.statusUpdated[key]=updatedAt;state.report=null;render();toast('Status saved');
+    state.statuses[key]=status;state.statusUpdated[key]=updatedAt;state.report=null;saveChanges();render();toast('Status saved');
   }));
   document.querySelectorAll('[data-client]').forEach(b=>b.addEventListener('click',()=>setPage('clients',b.dataset.client)));
   $('#back-clients')?.addEventListener('click',()=>setPage('clients'));
   $('#team-search')?.addEventListener('input',e=>{state.search=e.target.value;const pos=e.target.selectionStart;render();const input=$('#team-search');input.focus();input.setSelectionRange(pos,pos);});
-  $('#add-video')?.addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget,f=new FormData(form),title=String(f.get('title')).trim(),url=String(f.get('url')).trim();try{const u=new URL(url);if(u.protocol!=='https:')throw Error();}catch{toast('Use an https video link');return;}const button=form.querySelector('button');button.disabled=true;const {data:row,error}=await db.from('demo_videos').insert({user_id:state.user.id,client_id:state.client,title,url}).select('id').single();if(error){button.disabled=false;toast('Could not save video');return;}state.videos.push({id:row.id,clientId:state.client,title,url,format:'Video',sourceType:'Saved',views:null,note:''});render();toast('Video added');});
+  $('#add-video')?.addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.currentTarget),title=String(f.get('title')).trim(),url=String(f.get('url')).trim();try{const u=new URL(url);if(u.protocol!=='https:')throw Error();}catch{toast('Use an https video link');return;}state.videos.push({id:crypto.randomUUID(),clientId:state.client,title,url,createdAt:new Date().toISOString(),format:'Video',sourceType:'Saved',views:null,note:''});saveChanges();render();toast('Video added');});
   document.querySelectorAll('[data-video]').forEach(b=>b.addEventListener('click',()=>{const v=allVideos().find(x=>x.id===b.dataset.video);if(!v)return;if(!v.url.includes('play.gumlet.io/embed/')){window.open(v.url,'_blank','noopener');return;}const d=$('#video-dialog');$('.modal-body',d).innerHTML=`<h2>${esc(v.title)}</h2><iframe src="${esc(v.url)}" title="${esc(v.title)}" allow="autoplay; fullscreen" allowfullscreen></iframe><p class="meta">${esc(v.note)}</p>`;d.showModal();}));
-  document.querySelectorAll('[data-resolve]').forEach(b=>b.addEventListener('click',async()=>{const id=b.dataset.resolve,wasReviewed=state.resolved.includes(id);b.disabled=true;const result=wasReviewed?await db.from('reviewed_decisions').delete().eq('user_id',state.user.id).eq('decision_id',id):await db.from('reviewed_decisions').insert({user_id:state.user.id,decision_id:id});if(result.error){b.disabled=false;toast('Could not update decision');return;}state.resolved=wasReviewed?state.resolved.filter(x=>x!==id):[...state.resolved,id];if(wasReviewed)delete state.reviewedAt[id];else state.reviewedAt[id]=new Date().toISOString();state.report=null;render();}));
+  document.querySelectorAll('[data-resolve]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.resolve,wasReviewed=state.resolved.includes(id);state.resolved=wasReviewed?state.resolved.filter(x=>x!==id):[...state.resolved,id];if(wasReviewed)delete state.reviewedAt[id];else state.reviewedAt[id]=new Date().toISOString();state.report=null;saveChanges();render();}));
   $('#generate-report')?.addEventListener('click',async()=>{
     state.generating=true;state.report=null;render();
     try{
-      const {data:session,error}=await db.auth.getSession();if(error||!session.session?.access_token)throw Error('Sign in again');
-      const response=await fetch('/api/report',{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${session.session.access_token}`},body:JSON.stringify(reportPayload())});
+      const response=await fetch('/api/report',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(reportPayload())});
       const result=await response.json();if(!response.ok||!result.report)throw Error(result.error||'Could not generate report');
       state.report={plain:result.report};
-    }catch(error){toast(error.message||'Could not generate report');}
+    }catch{state.report={plain:localReport()};}
     state.generating=false;render();$('#report-result')?.scrollIntoView({behavior:'smooth',block:'start'});
   });
   $('#copy-report')?.addEventListener('click',()=>navigator.clipboard.writeText(state.report.plain).then(()=>toast('Report copied')));
@@ -165,14 +167,7 @@ function render(){
 document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>setPage(b.dataset.page)));
 $('.modal-close').addEventListener('click',()=>$('#video-dialog').close());
 $('#video-dialog').addEventListener('close',()=>$('.modal-body').innerHTML='');
-$('#sign-out').addEventListener('click',async()=>{await db.auth.signOut();state.user=null;state.videos=[];state.resolved=[];state.statuses={};state.statusUpdated={};state.reviewedAt={};state.report=null;renderAuth();});
 Promise.all([fetch('data.json').then(r=>r.json()),fetch('team.json').then(r=>r.json())]).then(async([d,t])=>{
   data=d;team=t;
-  const config=window.REALSTUDIO_SUPABASE;
-  if(!config?.url||!config?.publishableKey){$('#app').innerHTML='<div class="auth-card"><div class="brand"><span class="brand-mark"></span><span>REALSTUDIO</span></div><h1>Setup in progress</h1><p>Supabase sign-in is being connected. Please check back shortly.</p></div>';return;}
-  db=supabase.createClient(config.url,config.publishableKey);
-  const {data:session,error}=await db.auth.getSession();
-  if(error){renderAuth(error.message);return;}
-  if(session.session?.user)await enterApp(session.session.user);else renderAuth();
-  db.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'&&state.user){state.user=null;renderAuth();}});
+  enterApp();
 }).catch(()=>{$('#app').innerHTML='<div class="auth-card"><h1>Could not load the workspace</h1><p>Please refresh the page.</p></div>';});
